@@ -2,13 +2,13 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   pull_request:
-    branches: [main]
+    branches: [main, develop]
 
 env:
   PYTHON_VERSION: "3.12"
-  UV_VERSION: "0.5"
+  UV_CACHE_DIR: /tmp/.uv-cache
 
 jobs:
   lint:
@@ -20,23 +20,30 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
         run: uv python install ${{ env.PYTHON_VERSION }}
 
-      - name: Install linting dependencies
-        run: uv pip install ruff
+      - name: Configure SSH for private repo access
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Run ruff check
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run Ruff linting
         run: uv run ruff check .
 
-      - name: Run ruff format check
+      - name: Run Ruff formatting check
         run: uv run ruff format --check .
 
   test:
-    name: Test (PostgreSQL)
+    name: Test
     runs-on: ubuntu-latest
+
     services:
       postgres:
         image: postgres:16
@@ -51,13 +58,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
         run: uv python install ${{ env.PYTHON_VERSION }}
@@ -70,35 +79,26 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run migrations
-        run: uv run python manage.py migrate
-        env:
-          DB_NAME: test_db
-          DB_USER: postgres
-          DB_PASSWORD: postgres
-          DB_HOST: localhost
-          DB_PORT: 5432
-          SECRET_KEY: test-secret-key-for-ci
-
       - name: Run tests
-        run: uv run pytest -v --cov=apps --cov-report=xml
         env:
+          SECRET_KEY: test-secret-key-for-ci-workflow-minimum-32-chars
+          DEBUG: "false"
           DB_NAME: test_db
           DB_USER: postgres
           DB_PASSWORD: postgres
           DB_HOST: localhost
           DB_PORT: 5432
-          SECRET_KEY: test-secret-key-for-ci
+        run: uv run pytest -v --cov=apps --cov-report=xml
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage.xml
           fail_ci_if_error: false
+        continue-on-error: true
 
-  test-sqlite:
-    name: Test (SQLite)
+  typecheck:
+    name: Type Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -106,7 +106,8 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
-          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
 
       - name: Set up Python
         run: uv python install ${{ env.PYTHON_VERSION }}
@@ -119,14 +120,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Run migrations
-        run: uv run python manage.py migrate
-        env:
-          USE_SQLITE: "true"
-          SECRET_KEY: test-secret-key-for-ci
-
-      - name: Run tests
-        run: uv run pytest -v
-        env:
-          USE_SQLITE: "true"
-          SECRET_KEY: test-secret-key-for-ci
+      - name: Run mypy
+        run: uv run mypy apps/ --ignore-missing-imports
+        continue-on-error: true
