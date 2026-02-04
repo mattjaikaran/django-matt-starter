@@ -17,14 +17,14 @@ register_auth_routes(api)
 
 
 # Health check endpoint
-@api.get("/health", tags=["Health"])
+@api.get("health", tags=["Health"])
 async def health_check(request) -> dict:
     """Health check endpoint."""
     return {"status": "healthy"}
 
 
 # Example protected endpoint
-@api.get("/protected", tags=["Example"])
+@api.get("protected", tags=["Example"])
 @jwt_required
 async def protected_endpoint(request) -> dict:
     """Example protected endpoint - requires JWT auth."""

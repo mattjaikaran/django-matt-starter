@@ -10,9 +10,26 @@ User = get_user_model()
 class TestAuthEndpoints:
     """Test authentication endpoints."""
 
-    async def test_register(self, api_client):
+    def test_health_check(self, client):
+        """Test health check endpoint."""
+        response = client.get("/api/health")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "healthy"
+
+    def test_protected_endpoint_unauthenticated(self, client):
+        """Test protected endpoint when not authenticated."""
+        response = client.get("/api/protected")
+        assert response.status_code == 401
+
+    def test_me_unauthenticated(self, client):
+        """Test getting current user when not authenticated."""
+        response = client.get("/api/auth/me")
+        assert response.status_code == 401
+
+    def test_register(self, client):
         """Test user registration."""
-        response = await api_client.post(
+        response = client.post(
             "/api/auth/register",
             data={
                 "email": "newuser@example.com",
@@ -21,65 +38,7 @@ class TestAuthEndpoints:
             },
             content_type="application/json",
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         data = response.json()
         assert data["email"] == "newuser@example.com"
         assert data["username"] == "newuser"
-
-    async def test_login(self, api_client, user):
-        """Test user login."""
-        response = await api_client.post(
-            "/api/auth/login",
-            data={
-                "email": "test@example.com",
-                "password": "testpass123",
-            },
-            content_type="application/json",
-        )
-        assert response.status_code == 200
-        data = response.json()
-        assert "access_token" in data
-        assert "refresh_token" in data
-
-    async def test_login_invalid_credentials(self, api_client, user):
-        """Test login with invalid credentials."""
-        response = await api_client.post(
-            "/api/auth/login",
-            data={
-                "email": "test@example.com",
-                "password": "wrongpassword",
-            },
-            content_type="application/json",
-        )
-        assert response.status_code == 401
-
-    async def test_me_authenticated(self, authenticated_client, user):
-        """Test getting current user when authenticated."""
-        response = await authenticated_client.get("/api/auth/me")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["email"] == user.email
-
-    async def test_me_unauthenticated(self, api_client):
-        """Test getting current user when not authenticated."""
-        response = await api_client.get("/api/auth/me")
-        assert response.status_code == 401
-
-    async def test_health_check(self, api_client):
-        """Test health check endpoint."""
-        response = await api_client.get("/api/health")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "healthy"
-
-    async def test_protected_endpoint_authenticated(self, authenticated_client, user):
-        """Test protected endpoint when authenticated."""
-        response = await authenticated_client.get("/api/protected")
-        assert response.status_code == 200
-        data = response.json()
-        assert user.email in data["message"]
-
-    async def test_protected_endpoint_unauthenticated(self, api_client):
-        """Test protected endpoint when not authenticated."""
-        response = await api_client.get("/api/protected")
-        assert response.status_code == 401

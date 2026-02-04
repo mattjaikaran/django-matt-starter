@@ -2,9 +2,8 @@
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password, make_password
-
 from django_matt import MattAPI
-from django_matt.auth import create_token_pair, jwt_required, refresh_access_token
+from django_matt.auth import create_token_pair, jwt_required, refresh_tokens
 from django_matt.core import APIController
 from django_matt.core.errors import APIError, ValidationAPIError
 
@@ -27,8 +26,9 @@ class AuthController(APIController):
     tags = ["Auth"]
 
     @staticmethod
-    async def register(request, data: UserCreateSchema) -> UserSchema:
+    async def register(request, body: dict) -> dict:
         """Register a new user."""
+        data = UserCreateSchema(**body)
         # Check if email exists
         if await User.objects.filter(email=data.email).aexists():
             raise ValidationAPIError("Email already registered")
@@ -46,11 +46,12 @@ class AuthController(APIController):
             last_name=data.last_name,
         )
 
-        return UserSchema.model_validate(user)
+        return UserSchema.model_validate(user).model_dump(mode="json")
 
     @staticmethod
-    async def login(request, data: LoginSchema) -> TokenSchema:
+    async def login(request, body: dict) -> dict:
         """Login and get tokens."""
+        data = LoginSchema(**body)
         try:
             user = await User.objects.aget(email=data.email)
         except User.DoesNotExist:
@@ -63,27 +64,37 @@ class AuthController(APIController):
             raise APIError(status_code=401, message="Account is disabled")
 
         tokens = create_token_pair(user)
-        return TokenSchema(**tokens)
+        return {
+            "access_token": tokens.access_token,
+            "refresh_token": tokens.refresh_token,
+            "token_type": "bearer",
+        }
 
     @staticmethod
-    async def refresh(request, data: RefreshTokenSchema) -> TokenSchema:
+    async def refresh(request, body: dict) -> dict:
         """Refresh access token."""
+        data = RefreshTokenSchema(**body)
         try:
-            tokens = refresh_access_token(data.refresh_token)
-            return TokenSchema(**tokens)
+            tokens = refresh_tokens(data.refresh_token)
+            return {
+                "access_token": tokens.access_token,
+                "refresh_token": tokens.refresh_token,
+                "token_type": "bearer",
+            }
         except Exception as e:
             raise APIError(status_code=401, message=str(e))
 
     @staticmethod
     @jwt_required
-    async def me(request) -> UserSchema:
+    async def me(request) -> dict:
         """Get current user profile."""
-        return UserSchema.model_validate(request.user)
+        return UserSchema.model_validate(request.user).model_dump(mode="json")
 
     @staticmethod
     @jwt_required
-    async def update_me(request, data: UserUpdateSchema) -> UserSchema:
+    async def update_me(request, body: dict) -> dict:
         """Update current user profile."""
+        data = UserUpdateSchema(**body)
         user = request.user
         update_data = data.model_dump(exclude_unset=True)
 
@@ -91,12 +102,13 @@ class AuthController(APIController):
             setattr(user, field, value)
 
         await user.asave()
-        return UserSchema.model_validate(user)
+        return UserSchema.model_validate(user).model_dump(mode="json")
 
     @staticmethod
     @jwt_required
-    async def change_password(request, data: ChangePasswordSchema) -> dict:
+    async def change_password(request, body: dict) -> dict:
         """Change password."""
+        data = ChangePasswordSchema(**body)
         user = request.user
 
         if not check_password(data.current_password, user.password):
@@ -110,9 +122,9 @@ class AuthController(APIController):
 
 def register_auth_routes(api: MattAPI) -> None:
     """Register auth routes on the API."""
-    api.post("/auth/register", response=UserSchema, tags=["Auth"])(AuthController.register)
-    api.post("/auth/login", response=TokenSchema, tags=["Auth"])(AuthController.login)
-    api.post("/auth/refresh", response=TokenSchema, tags=["Auth"])(AuthController.refresh)
-    api.get("/auth/me", response=UserSchema, tags=["Auth"])(AuthController.me)
-    api.patch("/auth/me", response=UserSchema, tags=["Auth"])(AuthController.update_me)
-    api.post("/auth/change-password", tags=["Auth"])(AuthController.change_password)
+    api.post("auth/register", response_model=UserSchema, tags=["Auth"])(AuthController.register)
+    api.post("auth/login", response_model=TokenSchema, tags=["Auth"])(AuthController.login)
+    api.post("auth/refresh", response_model=TokenSchema, tags=["Auth"])(AuthController.refresh)
+    api.get("auth/me", response_model=UserSchema, tags=["Auth"])(AuthController.me)
+    api.patch("auth/me", response_model=UserSchema, tags=["Auth"])(AuthController.update_me)
+    api.post("auth/change-password", tags=["Auth"])(AuthController.change_password)

@@ -6,6 +6,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -127,8 +128,8 @@ DJANGO_MATT = {
 
 # JWT Settings
 DJANGO_MATT_JWT = {
-    "ACCESS_TOKEN_LIFETIME": 60 * 15,  # 15 minutes
-    "REFRESH_TOKEN_LIFETIME": 60 * 60 * 24 * 7,  # 7 days
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ALGORITHM": "HS256",
     "SIGNING_KEY": SECRET_KEY,
     "AUTH_HEADER_NAME": "Authorization",
