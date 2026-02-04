@@ -4,7 +4,7 @@ A minimal Django API template built with [django-matt](https://github.com/mattja
 
 ## Features
 
-- Django 5.2+ with async support
+- Django 6.0+ with async support
 - JWT authentication out of the box
 - Pydantic schemas for request/response validation
 - OpenAPI documentation (Swagger & ReDoc)
@@ -17,7 +17,7 @@ A minimal Django API template built with [django-matt](https://github.com/mattja
 
 ### Prerequisites
 
-- Python 3.12+
+- Python 3.14+
 - [uv](https://github.com/astral-sh/uv) package manager
 - PostgreSQL (or use SQLite for development)
 
@@ -116,12 +116,22 @@ django-matt-starter/
 │   ├── core/               # Shared models and utilities
 │   │   ├── __init__.py
 │   │   └── models.py       # Base models (TimestampMixin, etc.)
-│   └── users/              # User app
+│   └── users/              # User app (modular architecture)
 │       ├── __init__.py
 │       ├── admin.py        # Admin configuration
-│       ├── controllers.py  # API controllers
-│       ├── models.py       # User model
-│       └── schemas.py      # Pydantic schemas
+│       ├── controllers/    # API controllers
+│       │   ├── __init__.py
+│       │   ├── auth_controller.py
+│       │   └── routes.py
+│       ├── models/         # User models
+│       │   ├── __init__.py
+│       │   └── user_model.py
+│       └── schemas/        # Pydantic schemas
+│           ├── __init__.py
+│           ├── auth_schema.py
+│           └── user_schema.py
+├── scripts/
+│   └── check_file_length.py  # Pre-commit file length checker
 ├── config/
 │   ├── __init__.py
 │   ├── settings.py         # Django settings
