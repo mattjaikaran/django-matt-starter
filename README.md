@@ -58,7 +58,14 @@ make superuser
 # Or: python manage.py createsuperuser
 ```
 
-7. Run the development server:
+7. (Optional) Seed sample data:
+```bash
+python manage.py seed_data
+# Or with more users: python manage.py seed_data --users 10
+# Clear and reseed: python manage.py seed_data --clear
+```
+
+8. Run the development server:
 ```bash
 make run
 # Or: python manage.py runserver
@@ -112,45 +119,68 @@ Once running, visit:
 django-matt-starter/
 ├── apps/
 │   ├── __init__.py
-│   ├── api.py              # MattAPI initialization
-│   ├── core/               # Shared models and utilities
+│   ├── api.py                  # MattAPI initialization
+│   ├── core/                   # Shared models and utilities
 │   │   ├── __init__.py
-│   │   └── models.py       # Base models (TimestampMixin, etc.)
-│   └── users/              # User app (modular architecture)
+│   │   ├── models.py           # Base models (TimestampMixin, etc.)
+│   │   └── management/
+│   │       └── commands/
+│   │           └── seed_data.py  # Database seeding command
+│   └── users/                  # User app (modular architecture)
 │       ├── __init__.py
-│       ├── admin.py        # Admin configuration
-│       ├── controllers/    # API controllers
+│       ├── admin.py            # Admin configuration
+│       ├── controllers/        # API controllers
 │       │   ├── __init__.py
 │       │   ├── auth_controller.py
 │       │   └── routes.py
-│       ├── models/         # User models
+│       ├── models/             # User models
 │       │   ├── __init__.py
-│       │   └── user_model.py
-│       └── schemas/        # Pydantic schemas
+│       │   └── user.py
+│       └── schemas/            # Pydantic schemas
 │           ├── __init__.py
 │           ├── auth_schema.py
 │           └── user_schema.py
 ├── scripts/
-│   └── check_file_length.py  # Pre-commit file length checker
+│   └── check_file_length.py    # Pre-commit file length checker
 ├── config/
 │   ├── __init__.py
-│   ├── settings.py         # Django settings
-│   ├── urls.py             # URL configuration
-│   ├── wsgi.py             # WSGI config
-│   └── asgi.py             # ASGI config
-├── tests/                  # Test files
+│   ├── settings.py             # Django settings
+│   ├── test_settings.py        # Test-specific settings
+│   ├── urls.py                 # URL configuration
+│   ├── wsgi.py                 # WSGI config
+│   └── asgi.py                 # ASGI config
+├── tests/
 │   ├── __init__.py
-│   ├── conftest.py         # Pytest fixtures
-│   └── test_auth.py        # Authentication tests
+│   ├── conftest.py             # Pytest fixtures
+│   └── test_auth.py            # Authentication tests
+├── .env.example                # Environment template
 ├── Dockerfile
 ├── docker-compose.yml
 ├── Makefile
 ├── pyproject.toml
 ├── manage.py
-├── .env.example
 ├── .gitignore
 └── README.md
 ```
+
+## Seed Data
+
+Quickly populate your database with sample data for development:
+
+```bash
+# Create admin user and sample users
+python manage.py seed_data
+
+# Create more users
+python manage.py seed_data --users 10
+
+# Clear existing data and reseed
+python manage.py seed_data --clear
+```
+
+**Default Credentials:**
+- Admin: `admin@example.com` / `admin123`
+- Users: `user1@example.com` / `password123`
 
 ## Development
 
