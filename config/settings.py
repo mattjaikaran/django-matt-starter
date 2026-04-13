@@ -32,9 +32,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    # django-matt (must come after django.contrib apps)
+    "django_matt",
     # Local apps
-    "apps.users",
     "apps.core",
+    "apps.users",
 ]
 
 MIDDLEWARE = [
@@ -45,8 +47,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    # django-matt middleware
-    "django_matt.utils.errors.ErrorMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
