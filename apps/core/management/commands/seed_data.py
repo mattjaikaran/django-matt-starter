@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 username=f"user{i}",
                 email=email,
                 password="password123",
-                first_name=f"User",
+                first_name="User",
                 last_name=f"{i}",
                 bio=f"Sample user {i} for development testing.",
             )
