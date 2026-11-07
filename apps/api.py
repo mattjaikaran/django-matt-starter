@@ -1,12 +1,12 @@
 """API configuration and routes."""
 
-from django_matt import MattAPI
+from django_matt import DjangoMattAPI
 from django_matt.auth import jwt_required
 
 from apps.users.controllers import register_auth_routes
 
 # Create the API instance
-api = MattAPI(
+api = DjangoMattAPI(
     title="My API",
     version="1.0.0",
     description="A modern API built with django-matt",
