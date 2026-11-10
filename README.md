@@ -117,6 +117,14 @@ Once running, visit:
 
 ```
 django-matt-starter/
+├── .claude/
+│   └── skills/
+│       └── migrations/
+│           └── SKILL.md        # Migration conflict procedure
+├── docs/                       # Architecture, commands, standards, testing
+├── tasks/
+│   └── specs/
+│       └── README.md           # agent-run spec format
 ├── apps/
 │   ├── __init__.py
 │   ├── api.py                  # MattAPI initialization
@@ -141,7 +149,8 @@ django-matt-starter/
 │           ├── auth_schema.py
 │           └── user_schema.py
 ├── scripts/
-│   └── check_file_length.py    # Pre-commit file length checker
+│   ├── check_file_length.py    # Pre-commit file length checker
+│   └── check_agents_docs.py    # AGENTS.md link and skill checker
 ├── config/
 │   ├── __init__.py
 │   ├── settings.py             # Django settings
@@ -159,9 +168,19 @@ django-matt-starter/
 ├── Makefile
 ├── pyproject.toml
 ├── manage.py
+├── AGENTS.md                   # Agent instructions
+├── CLAUDE.md                   # Imports AGENTS.md
 ├── .gitignore
 └── README.md
 ```
+
+## Documentation
+
+- [docs/architecture.md](docs/architecture.md) — stack, layout and request flow.
+- [docs/commands.md](docs/commands.md) — every Make target and its prerequisites.
+- [docs/code-standards.md](docs/code-standards.md) — style and module boundaries.
+- [docs/testing.md](docs/testing.md) — test layout, fixtures and coverage.
+- [AGENTS.md](AGENTS.md) — instructions for coding agents.
 
 ## Seed Data
 

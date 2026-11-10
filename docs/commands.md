@@ -1,0 +1,64 @@
+# Commands
+
+All commands run from the repository root. `make help` lists the targets.
+
+## Prerequisites
+
+- Python 3.12+; CI runs 3.14.
+- [uv](https://github.com/astral-sh/uv).
+- SSH access to `github.com/mattjaikaran/django-matt`. The dependency in
+  `pyproject.toml` uses a `git+ssh` URL, so installs fail without a key that
+  GitHub accepts. CI injects `SSH_PRIVATE_KEY`.
+- PostgreSQL 16, or `USE_SQLITE=True` in `.env`. Redis is optional: the compose
+  stack runs it, but the current settings do not require it.
+
+## Clean checkout
+
+```bash
+uv venv
+source .venv/bin/activate
+make dev
+cp .env.example .env
+make migrate
+make run
+```
+
+`make install` installs runtime dependencies only; `make dev` adds the `dev`
+extras (pytest, Ruff, mypy, django-stubs, django-safe-migrations).
+
+## Targets
+
+| Target | Runs |
+| --- | --- |
+| `make install` | `uv pip install -e .` |
+| `make dev` | `uv pip install -e ".[dev]"` |
+| `make run` | `python manage.py runserver` |
+| `make test` | pytest with `--cov=apps` |
+| `make lint` | `ruff check .` and `mypy apps/` |
+| `make format` | `ruff format .` and `ruff check --fix .` |
+| `make migrate` | `makemigrations` then `migrate` |
+| `make migrations-check` | leaf, safety and no-merge checks |
+| `make migrations-renumber` | dry run; add `ARGS=--apply` to rename |
+| `make agents-check` | validate `AGENTS.md`, `CLAUDE.md` and skills |
+| `make superuser` | `createsuperuser` |
+| `make shell` | Django shell |
+| `make sync-types` | export TypeScript types to `../frontend/src/types` |
+| `make docker-up` | PostgreSQL and Redis in Docker |
+| `make docker-up-all` | the full compose stack |
+| `make docker-dev` | the `dev` compose profile with hot reload |
+| `make docker-build` | build the API image |
+| `make docker-logs` | follow compose logs |
+| `make docker-down` | stop the compose stack |
+| `make clean` | remove caches and build output |
+
+## Tests
+
+`make test` uses `config.test_settings`, which forces `USE_SQLITE=true`, so no
+database container is needed. CI runs the same suite with PostgreSQL.
+
+## Migrations
+
+`make migrations-check` runs `scripts/db/check_migrations.py`: it detects merge
+migrations, checks for multiple leaf nodes, and runs django-safe-migrations
+against the configured base. The check needs the Django environment, so it runs
+with the `dev` dependencies installed.

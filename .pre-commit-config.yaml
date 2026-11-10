@@ -31,6 +31,13 @@ repos:
         pass_filenames: false
         always_run: true
 
+      - id: check-agents-docs
+        name: Agent docs are present and linked
+        entry: python3 scripts/check_agents_docs.py
+        language: system
+        pass_filenames: false
+        always_run: true
+
   # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

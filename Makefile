@@ -1,4 +1,4 @@
-.PHONY: help install dev test lint format migrate run docker-up docker-down clean migrations-check migrations-renumber
+.PHONY: help install dev test lint format migrate run docker-up docker-down clean migrations-check migrations-renumber agents-check
 
 # Default target
 help:
@@ -12,6 +12,7 @@ help:
 	@echo "  make migrate     - Run migrations"
 	@echo "  make migrations-check - Leaf, lint and no-merge checks"
 	@echo "  make migrations-renumber - Fix a migration conflict (ARGS=--apply)"
+	@echo "  make agents-check - Validate AGENTS.md and skills"
 	@echo "  make docker-up   - Start Docker containers"
 	@echo "  make docker-down - Stop Docker containers"
 	@echo "  make clean       - Clean up generated files"
@@ -54,6 +55,10 @@ migrations-check:
 # Dry run; `make migrations-renumber ARGS=--apply` writes the renames.
 migrations-renumber:
 	python3 scripts/db/renumber_migrations.py $(ARGS)
+
+# Agent docs: AGENTS.md links, CLAUDE.md import, skill frontmatter.
+agents-check:
+	python3 scripts/check_agents_docs.py
 
 # Create superuser
 superuser:
