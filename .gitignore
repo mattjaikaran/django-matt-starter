@@ -56,6 +56,9 @@ htmlcov/
 .env.local
 .env.*.local
 
+# Personal agent/tool settings
+*.local.*
+
 # macOS
 .DS_Store
 

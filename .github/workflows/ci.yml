@@ -11,6 +11,15 @@ env:
   UV_CACHE_DIR: /tmp/.uv-cache
 
 jobs:
+  agents-docs:
+    name: Agent docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check AGENTS.md links and skills
+        run: python3 scripts/check_agents_docs.py
+
   lint:
     name: Lint
     runs-on: ubuntu-latest
