@@ -51,6 +51,15 @@ extras (pytest, Ruff, mypy, django-stubs, django-safe-migrations).
 | `make docker-down` | stop the compose stack |
 | `make clean` | remove caches and build output |
 
+## CI
+
+`.github/workflows/ci.yml` runs on pushes to `main` and `develop`, and on pull
+requests. A draft PR runs nothing: marking it ready for review starts the run.
+On a PR, a docs-only diff (Markdown, `docs/`, `tasks/specs/`) runs only the
+Changes and Agent docs jobs; Lint, Test, Type Check and Migrations wait for a
+non-docs change. A newer push cancels the older PR run. Job names are
+unchanged, so required status checks keep working.
+
 ## Tests
 
 `make test` uses `config.test_settings`, which forces `USE_SQLITE=true`, so no
