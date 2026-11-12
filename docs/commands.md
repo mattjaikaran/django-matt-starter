@@ -60,6 +60,26 @@ Changes and Agent docs jobs; Lint, Test, Type Check and Migrations wait for a
 non-docs change. A newer push cancels the older PR run. Job names are
 unchanged, so required status checks keep working.
 
+## Factory runs
+
+The factory gives each run its own git worktree, added from the primary clone
+with `git worktree add -B <branch> <path> origin/<branch>`. Git refuses that
+command while the branch is checked out somewhere else, so the run ends with
+`fatal: '<branch>' is already used by worktree at '<path>'` and exit 1. Two
+states cause it:
+
+- The primary clone sits on the PR branch: leave it on `main`.
+- A deleted worktree is still registered and holds the branch: `git worktree
+  list` shows it.
+
+Either state is cleared in the primary clone, and the same command then
+succeeds:
+
+```bash
+git -C <primary> switch main
+git -C <primary> worktree prune
+```
+
 ## Tests
 
 `make test` uses `config.test_settings`, which forces `USE_SQLITE=true`, so no
