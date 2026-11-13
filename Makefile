@@ -56,7 +56,7 @@ migrations-check:
 migrations-renumber:
 	python3 scripts/db/renumber_migrations.py $(ARGS)
 
-# Agent docs: AGENTS.md links, CLAUDE.md import, skill frontmatter.
+# Agent docs: AGENTS.md links, the adapter ban, skill frontmatter.
 agents-check:
 	python3 scripts/check_agents_docs.py
 

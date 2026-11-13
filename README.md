@@ -166,10 +166,10 @@ django-matt-starter/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── Makefile
+├── justfile                    # Developer recipes (delegate to Makefile targets)
 ├── pyproject.toml
 ├── manage.py
-├── AGENTS.md                   # Agent instructions
-├── CLAUDE.md                   # Imports AGENTS.md
+├── AGENTS.md                   # Agent instructions (backend scope)
 ├── .gitignore
 └── README.md
 ```
@@ -177,7 +177,7 @@ django-matt-starter/
 ## Documentation
 
 - [docs/architecture.md](docs/architecture.md) — stack, layout and request flow.
-- [docs/commands.md](docs/commands.md) — every Make target and its prerequisites.
+- [docs/commands.md](docs/commands.md) — every recipe and target, and its prerequisites.
 - [docs/code-standards.md](docs/code-standards.md) — style and module boundaries.
 - [docs/testing.md](docs/testing.md) — test layout, fixtures and coverage.
 - [AGENTS.md](AGENTS.md) — instructions for coding agents.
