@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate agent instructions: AGENTS.md, its links, and skills."""
+"""Validate agent instructions: AGENTS.md, its links, its adapter ban, and skills."""
 
 from __future__ import annotations
 
@@ -60,10 +60,9 @@ def check_agents() -> list[str]:
 
 
 def check_claude() -> list[str]:
-    if not CLAUDE.is_file():
-        return []
-    if CLAUDE.read_text(encoding="utf-8").strip() != "@AGENTS.md":
-        return ["CLAUDE.md must contain only the line @AGENTS.md"]
+    """AGENTS.md is the only agent file; a harness adapter must not duplicate it."""
+    if CLAUDE.is_file():
+        return ["CLAUDE.md must not exist; AGENTS.md is the only agent file"]
     return []
 
 
@@ -95,8 +94,7 @@ def check_skills() -> list[str]:
                 problems.append(f"{relative} is missing frontmatter field: {field}")
         if fields.get("name") and fields["name"] != skill.parent.name:
             problems.append(
-                f"{relative} name {fields['name']!r} does not match "
-                f"directory {skill.parent.name!r}"
+                f"{relative} name {fields['name']!r} does not match directory {skill.parent.name!r}"
             )
     return problems
 
